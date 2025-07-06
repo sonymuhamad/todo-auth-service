@@ -12,10 +12,14 @@ MVN            := ./mvnw                                   # or just mvn if no w
 compile:
 	@echo "🔧 Compiling Java sources..."
 	$(MVN) -B -ntp clean package -DskipTests
+	@echo "📦 Renaming JAR to target/app.jar"
+	cp $$(ls target/*.jar | head -1) target/app.jar
+
 
 build: compile
 	@echo "🐳 building $(IMAGE):$(TAG)"
-	docker build -t $(IMAGE):$(TAG) .
+	docker build \
+	  -t $(IMAGE):$(TAG) .
 
 push: build
 	@echo "🚀 Pushing to Docker Hub: $(IMAGE):$(TAG)"
