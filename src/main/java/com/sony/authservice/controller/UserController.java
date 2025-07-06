@@ -7,6 +7,7 @@ import com.sony.authservice.dto.response.user.UserResponse;
 import com.sony.authservice.model.User;
 import com.sony.authservice.service.UserService;
 
+import com.sony.authservice.util.JwtUtil;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -23,18 +24,25 @@ public class UserController {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private JwtUtil jwtUtil;
+
     @PostMapping("/register")
     public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest request) {
         User user = userService.register(request.getEmail(),request.getPassword());
 
+        String token = jwtUtil.generateToken(user.getId(),null,null);
+
         return ResponseEntity.status(HttpStatus.CREATED).
-                body(BaseResponse.success(new UserResponse(user),"Register success", HttpStatus.CREATED));
+                body(BaseResponse.success(new UserResponse(user,token),"Register success", HttpStatus.CREATED));
     }
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@Valid @RequestBody LoginRequest request) {
         User user = userService.login(request.getEmail(),request.getPassword());
 
-        return ResponseEntity.ok(BaseResponse.success(new UserResponse(user),"Logic success", HttpStatus.OK));
+        String token = jwtUtil.generateToken(user.getId(),null,null);
+
+        return ResponseEntity.ok(BaseResponse.success(new UserResponse(user,token),"Logic success", HttpStatus.OK));
     }
 }
